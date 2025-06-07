@@ -30,16 +30,40 @@ This is the frontend application for the parking lot management system. The back
    ```bash
    pnpm install
    ```
-3. Make sure the [backend server](https://github.com/atrasnajwan/parking-lot) is running
-4. Start the development server:
+3. Set up environment variables:
+   - Copy `.env.example` to `.env.development`
+   - Update the variables if needed:
+     - `VITE_API_BASE_URL`: Backend API URL
+     - `VITE_PORT`: Frontend development server port
+4. Make sure the [backend server](https://github.com/atrasnajwan/parking-lot) is running
+5. Start the development server:
    ```bash
    pnpm dev
    ```
-5. Open [http://localhost:5173](http://localhost:5173) in your browser
+6. Open [http://localhost:${VITE_PORT}](http://localhost:5173) in your browser (default port: 5173)
 
 ## 🔧 Configuration
 
-The application expects the backend API to be running at `http://localhost:3000`. If your backend is running on a different URL, update the `API_BASE_URL` in `src/services/api.ts`.
+The application uses environment variables for configuration:
+
+- `VITE_API_BASE_URL`: The URL of the backend API (default: `http://localhost:3000`)
+- `VITE_PORT`: The port for the development server (default: `5173`)
+
+For development:
+1. Create `.env.development` file with:
+   ```env
+   VITE_API_BASE_URL=http://localhost:3000
+   VITE_PORT=5173
+   ```
+2. Adjust values as needed for your environment
+
+For production:
+1. Create `.env.production` file with:
+   ```env
+   VITE_API_BASE_URL=https://your-production-api-url
+   VITE_PORT=5173
+   ```
+2. Set appropriate values for your production environment
 
 ## 📝 Usage
 
