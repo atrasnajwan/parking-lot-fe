@@ -386,7 +386,10 @@ export function ParkingLotManager() {
           <Button
             variant="light"
             color="red"
-            onClick={() => api.resetParkingLot().then(loadParkingLot)}
+            onClick={() => api.resetParkingLot().then(() => {
+              loadParkingLot();
+              loadParkingRecords();
+            })}
             leftSection={<IconGaugeOff size={20} />}
           >
             Reset
