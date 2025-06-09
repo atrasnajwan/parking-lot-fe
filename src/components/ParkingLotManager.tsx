@@ -36,11 +36,16 @@ const getErrorMessage = (error: unknown): string => {
     // Try to get the error message from the API response
     const errorData = axiosError.response?.data;
     if (errorData?.errors) {
-      // Collect all error messages from all fields
-      const messages = Object.entries(errorData.errors)
-        .map(([field, errors]) => errors.map(err => `${field}: ${err}`))
-        .flat();
-      return messages.join('\n');
+      if (typeof errorData.errors === 'string') {
+        // Handle plain string error
+        return errorData.errors;
+      } else if (typeof errorData.errors === 'object') {
+        // Collect all error messages from all fields
+        const messages = Object.entries(errorData.errors)
+          .map(([field, errors]) => errors.map(err => `${field}: ${err}`))
+          .flat();
+        return messages.join('\n');
+      }
     }
     if (errorData?.message) return errorData.message;
     // Fallback to the error message if no API message
@@ -196,9 +201,9 @@ export function ParkingLotManager() {
       loadParkingRecords();
       setIsParking(false);
       setSelectedGate(null);
-      setParkingForm({ 
-        plateNumber: '', 
-        size: 'small', 
+      setParkingForm({
+        plateNumber: '',
+        size: 'small',
         gateId: '',
         timeAt: new Date(),
       });
@@ -302,7 +307,7 @@ export function ParkingLotManager() {
     return (
       <Box ta="center" py="xl">
         <Text size="xl" mb="md">No Parking Lot Available</Text>
-        <Button 
+        <Button
           onClick={handleCreateLotClick}
           leftSection={<IconCarGarage size={20} />}
         >
@@ -335,7 +340,7 @@ export function ParkingLotManager() {
               label="Auto-populate gates"
               description="Automatically generate gates with default size and random position"
               checked={createLotForm.autoPopulate}
-              onChange={(event) => setCreateLotForm(prev => ({ ...prev, autoPopulate: event.currentTarget.checked }))}
+              onChange={() => setCreateLotForm(prev => ({ ...prev, autoPopulate: !prev.autoPopulate }))}
             />
             {createLotForm.autoPopulate && (
               <NumberInput
@@ -344,7 +349,6 @@ export function ParkingLotManager() {
                 value={createLotForm.gateSize}
                 onChange={(value) => setCreateLotForm(prev => ({ ...prev, gateSize: Number(value) || 3 }))}
                 min={1}
-                max={5}
               />
             )}
             <Button onClick={handleCreateParkingLot}>Create</Button>
@@ -414,13 +418,13 @@ export function ParkingLotManager() {
               <Group align="flex-start" gap={0} wrap="nowrap">
                 <Stack gap={CELL_GAP} justify="flex-start" w={CELL_SIZE} mt={24}>
                   {Array.from({ length: parkingLot.total_height }).map((_, index) => (
-                    <Text 
-                      key={index} 
-                      size="xs" 
-                      c="dimmed" 
+                    <Text
+                      key={index}
+                      size="xs"
+                      c="dimmed"
                       ta="center"
                       h={CELL_SIZE}
-                      style={{ 
+                      style={{
                         lineHeight: `${CELL_SIZE}px`
                       }}
                     >
@@ -433,9 +437,9 @@ export function ParkingLotManager() {
                   {/* X-axis labels */}
                   <Group gap={CELL_GAP} mb={CELL_GAP} pl={0}>
                     {Array.from({ length: parkingLot.total_width }).map((_, index) => (
-                      <Text 
-                        key={index} 
-                        size="xs" 
+                      <Text
+                        key={index}
+                        size="xs"
                         c="dimmed"
                         w={CELL_SIZE}
                         ta="center"
@@ -521,14 +525,14 @@ export function ParkingLotManager() {
 
         <Grid.Col span={4}>
           <Stack>
-          <FeeRules />
+            <FeeRules />
             <Paper withBorder p="md">
               <Text fw={500} mb="md">Recent Parking Records</Text>
               <Stack>
                 {parkingRecords.map(record => (
-                  <Paper 
-                    key={record.id} 
-                    withBorder 
+                  <Paper
+                    key={record.id}
+                    withBorder
                     p="xs"
                     style={{ cursor: 'pointer' }}
                     onClick={() => handleRecordClick(record)}
@@ -638,7 +642,7 @@ export function ParkingLotManager() {
             <Text>Position: ({selectedSlot.position.x}, {selectedSlot.position.y})</Text>
             <Group>
               <Text>Size:</Text>
-              <Text 
+              <Text
                 fw={500}
                 c={SLOT_COLORS[selectedSlot.size]}
                 style={{ textTransform: 'capitalize' }}
@@ -651,7 +655,7 @@ export function ParkingLotManager() {
                 <Text>Occupied by: {selectedSlot.vehicle.id}</Text>
                 <Group>
                   <Text>Vehicle size:</Text>
-                  <Text 
+                  <Text
                     fw={500}
                     c={SLOT_COLORS[selectedSlot.vehicle.size]}
                     style={{ textTransform: 'capitalize' }}
@@ -682,7 +686,7 @@ export function ParkingLotManager() {
               <Stack gap="xs">
                 <Group justify="space-between">
                   <Text fw={700} size="lg">Ticket #{selectedRecord.id}</Text>
-                  <Badge 
+                  <Badge
                     color={selectedRecord.check_out_at ? 'green' : 'blue'}
                     size="lg"
                   >
@@ -690,7 +694,7 @@ export function ParkingLotManager() {
                   </Badge>
                 </Group>
                 <Divider />
-                
+
                 <Text fw={500}>Vehicle Information</Text>
                 <Group>
                   <Text>Plate Number:</Text>
@@ -698,8 +702,8 @@ export function ParkingLotManager() {
                 </Group>
                 <Group>
                   <Text>Vehicle Size:</Text>
-                  <Text 
-                    fw={500} 
+                  <Text
+                    fw={500}
                     style={{ textTransform: 'capitalize' }}
                     c={SLOT_COLORS[selectedRecord.vehicle.size]}
                   >
@@ -708,7 +712,7 @@ export function ParkingLotManager() {
                 </Group>
 
                 <Divider />
-                
+
                 <Text fw={500}>Parking Information</Text>
                 <Group>
                   <Text>Entry Gate:</Text>
@@ -717,8 +721,8 @@ export function ParkingLotManager() {
                 <Group>
                   <Text>Parking Slot:</Text>
                   <Text fw={500}>
-                    <Text 
-                      span 
+                    <Text
+                      span
                       c={SLOT_COLORS[selectedRecord.slot.size]}
                       style={{ textTransform: 'capitalize' }}
                     >
@@ -729,7 +733,7 @@ export function ParkingLotManager() {
                 </Group>
 
                 <Divider />
-                
+
                 <Text fw={500}>Time & Fee Information</Text>
                 <Group>
                   <Text>Check-in Time:</Text>
@@ -803,7 +807,7 @@ export function ParkingLotManager() {
             defaultValue={new Date()}
             withSeconds
           />
-          <Button 
+          <Button
             onClick={handleManualUnpark}
             disabled={!manualUnparkForm.plateNumber}
           >
